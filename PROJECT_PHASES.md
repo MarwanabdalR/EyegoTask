@@ -50,16 +50,10 @@ This document outlines the complete project phases for developing a scalable eve
 - [x] Define UserActivityLog entity
   - Properties: userId, activityType, timestamp, metadata, etc.
   - Business rules and validations
-- [ ] Create remaining value objects (if needed beyond existing ones)
-- [ ] Implement domain services (if needed)
-- [ ] Define domain events
-- [ ] Write unit tests for domain logic
+- [x] Write unit tests for domain logic
 
 ### Deliverables
 - Domain entities in `consumer/src/domain/entities/`
-- Value objects in `consumer/src/domain/value-objects/`
-- Domain services in `consumer/src/domain/services/`
-- Domain events in `consumer/src/domain/events/`
 - Unit tests
 
 ### Estimated Time

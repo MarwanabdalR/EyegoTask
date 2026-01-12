@@ -4,7 +4,6 @@ import { LogTimestamp } from '../value-objects/LogTimestamp';
 import { IpAddress } from '../value-objects/IpAddress';
 import { SessionId } from '../value-objects/SessionId';
 import { UserAgent } from '../value-objects/UserAgent';
-import { Version } from '../value-objects/Version';
 import { UserId } from '../value-objects/UserId';
 import { Metadata } from '../value-objects/Metadata';
 
@@ -17,7 +16,6 @@ export interface UserActivityLogProps {
     ipAddress?: IpAddress;
     userAgent?: UserAgent;
     eventId?: EventId;
-    version?: Version;
 }
 
 export class UserActivityLog {
@@ -29,7 +27,6 @@ export class UserActivityLog {
     public readonly ipAddress?: IpAddress;
     public readonly userAgent?: UserAgent;
     public readonly eventId: EventId;
-    public readonly version: Version;
 
     constructor(props: UserActivityLogProps) {
         this.userId = props.userId;
@@ -40,6 +37,5 @@ export class UserActivityLog {
         this.ipAddress = props.ipAddress;
         this.userAgent = props.userAgent;
         this.eventId = props.eventId || new EventId();
-        this.version = props.version || new Version();
     }
 }
