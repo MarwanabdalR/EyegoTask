@@ -21,18 +21,15 @@ This document outlines the complete project phases for developing a scalable eve
   - Infrastructure layer (repositories, external services)
   - Presentation layer (REST API controllers)
 - [x] Configure ESLint, Prettier, and TypeScript
-- [ ] Set up Git repository and initialize .gitignore
-- [ ] Create initial README.md structure
-- [ ] Design database schema for user activity logs
-- [ ] Design Kafka topics structure
-- [ ] Document architecture decisions
+- [x] Set up Git repository and initialize .gitignore
+- [x] Create initial README.md structure
+- [x] Design database schema for user activity logs
+- [x] Design Kafka topics structure
 
 ### Deliverables
 - Project folder structure
 - TypeScript configuration
 - Initial README.md
-- Architecture diagram (optional but recommended)
-- Domain model documentation
 
 ### Estimated Time
 2-3 hours

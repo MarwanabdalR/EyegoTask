@@ -101,10 +101,6 @@ Desktop.ini
 # Docker
 .dockerignore
 
-# Kubernetes
-*.yaml
-*.yml
-
 # MongoDB data (if local)
 data/
 
