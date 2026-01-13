@@ -72,7 +72,7 @@ This document outlines the complete project phases for developing a scalable eve
 
 ---
 
-## Phase 3: Infrastructure Layer - MongoDB Integration (Consumer Service)
+## Phase 3: Infrastructure Layer - MongoDB Integration (Consumer Service) 
 
 ### Objectives
 
