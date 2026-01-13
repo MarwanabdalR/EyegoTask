@@ -1,9 +1,11 @@
 # Project Phases - Event-Driven Microservices Architecture
 
 ## Overview
+
 This document outlines the complete project phases for developing a scalable event-driven microservices system using Node.js, Express, and Kafka for real-time processing of user activity logs.
 
 **Architecture:** Microservices with two distinct services:
+
 - **Producer Service:** API Gateway (Express.js) for ingesting logs and publishing to Kafka
 - **Consumer Service:** Domain logic, MongoDB persistence, and query API for reading logs
 
@@ -12,12 +14,14 @@ This document outlines the complete project phases for developing a scalable eve
 ## Phase 1: Project Setup & Architecture Design
 
 ### Objectives
+
 - Initialize microservices project structure
 - Set up development environment
 - Design system architecture
 - Create technical documentation
 
 ### Tasks
+
 - [x] Initialize Node.js project with TypeScript
 - [x] Set up microservices structure with `producer` and `consumer` services
 - [x] Configure ESLint, Prettier, and TypeScript
@@ -27,11 +31,13 @@ This document outlines the complete project phases for developing a scalable eve
 - [x] Design Kafka topics structure
 
 ### Deliverables
+
 - Microservices folder structure
 - TypeScript configuration
 - Initial README.md
 
 ### Estimated Time
+
 2-3 hours
 
 ---
@@ -39,24 +45,29 @@ This document outlines the complete project phases for developing a scalable eve
 ## Phase 2: Domain Layer Implementation (Consumer Service)
 
 ### Objectives
+
 - Implement domain entities and value objects in the **consumer service**
 - Define domain services and business logic
 - Set up domain events
 
 ### Path
+
 `consumer/src/domain/`
 
 ### Tasks
+
 - [x] Define UserActivityLog entity
   - Properties: userId, activityType, timestamp, metadata, etc.
   - Business rules and validations
 - [x] Write unit tests for domain logic
 
 ### Deliverables
+
 - Domain entities in `consumer/src/domain/entities/`
 - Unit tests
 
 ### Estimated Time
+
 3-4 hours
 
 ---
@@ -64,27 +75,31 @@ This document outlines the complete project phases for developing a scalable eve
 ## Phase 3: Infrastructure Layer - MongoDB Integration (Consumer Service)
 
 ### Objectives
+
 - Implement MongoDB connection and repository pattern in the **consumer service**
 - Create indexes for optimal query performance
 - Implement data access layer
 
 ### Path
+
 `consumer/src/infrastructure/database/`
 
 ### Tasks
-- [ ] Set up MongoDB connection using Mongoose or native driver
-- [ ] Create MongoDB schema/model for UserActivityLog
-- [ ] Implement repository interface (domain layer)
-- [ ] Implement MongoDB repository (infrastructure layer)
-- [ ] Create indexes:
+
+- [x] Set up MongoDB connection using Mongoose or native driver
+- [x] Create MongoDB schema/model for UserActivityLog
+- [x] Implement repository interface (domain layer)
+- [x] Implement MongoDB repository (infrastructure layer)
+- [x] Create indexes:
   - userId index
   - timestamp index
   - activityType index
   - Compound indexes for common queries
-- [ ] Implement connection pooling and error handling
-- [ ] Write integration tests for repository
+- [x] Implement connection pooling and error handling
+- [x] Write integration tests for repository
 
 ### Deliverables
+
 - MongoDB connection module in `consumer/src/infrastructure/database/`
 - UserActivityLog model/schema
 - Repository implementation
@@ -92,6 +107,7 @@ This document outlines the complete project phases for developing a scalable eve
 - Integration tests
 
 ### Estimated Time
+
 4-5 hours
 
 ---
@@ -99,6 +115,7 @@ This document outlines the complete project phases for developing a scalable eve
 ## Phase 4: Infrastructure Layer - Kafka Integration (Both Services)
 
 ### Objectives
+
 - Implement Kafka producer in the **producer service**
 - Implement Kafka consumer in the **consumer service**
 - Handle message serialization/deserialization
@@ -107,9 +124,11 @@ This document outlines the complete project phases for developing a scalable eve
 ### Part A: Producer Service - Kafka Producer
 
 #### Path
+
 `producer/src/infrastructure/kafka/`
 
 #### Tasks
+
 - [ ] Set up Kafka client library (kafkajs) in producer service
 - [ ] Configure Kafka producer:
   - Connection settings
@@ -121,6 +140,7 @@ This document outlines the complete project phases for developing a scalable eve
 - [ ] Write unit tests for Kafka producer
 
 #### Deliverables
+
 - Kafka producer module in `producer/src/infrastructure/kafka/`
 - Message schemas
 - Error handling logic
@@ -129,9 +149,11 @@ This document outlines the complete project phases for developing a scalable eve
 ### Part B: Consumer Service - Kafka Consumer
 
 #### Path
+
 `consumer/src/infrastructure/kafka/`
 
 #### Tasks
+
 - [ ] Set up Kafka client library (kafkajs) in consumer service
 - [ ] Configure Kafka consumer:
   - Consumer group configuration
@@ -144,12 +166,14 @@ This document outlines the complete project phases for developing a scalable eve
 - [ ] Write unit tests for Kafka consumer
 
 #### Deliverables
+
 - Kafka consumer module in `consumer/src/infrastructure/kafka/`
 - Message processing logic
 - Domain integration
 - Unit tests
 
 ### Estimated Time
+
 6-8 hours (both parts)
 
 ---
@@ -157,6 +181,7 @@ This document outlines the complete project phases for developing a scalable eve
 ## Phase 5: Application Layer Implementation (Both Services)
 
 ### Objectives
+
 - Implement use cases/application services in both services
 - Create DTOs for data transfer
 - Orchestrate domain and infrastructure layers
@@ -164,9 +189,11 @@ This document outlines the complete project phases for developing a scalable eve
 ### Part A: Producer Service - Application Layer
 
 #### Path
+
 `producer/src/application/`
 
 #### Tasks
+
 - [ ] Create use cases:
   - PublishUserActivityLogUseCase
 - [ ] Implement DTOs (Data Transfer Objects) for incoming requests
@@ -175,6 +202,7 @@ This document outlines the complete project phases for developing a scalable eve
 - [ ] Write unit tests for use cases
 
 #### Deliverables
+
 - Use case implementations in `producer/src/application/use-cases/`
 - DTOs in `producer/src/application/dtos/`
 - Validation logic
@@ -183,9 +211,11 @@ This document outlines the complete project phases for developing a scalable eve
 ### Part B: Consumer Service - Application Layer
 
 #### Path
+
 `consumer/src/application/`
 
 #### Tasks
+
 - [ ] Create use cases:
   - ProcessUserActivityLogUseCase (triggered by Kafka consumer)
   - GetUserActivityLogsUseCase
@@ -197,6 +227,7 @@ This document outlines the complete project phases for developing a scalable eve
 - [ ] Write unit tests for use cases
 
 #### Deliverables
+
 - Use case implementations in `consumer/src/application/use-cases/`
 - DTOs in `consumer/src/application/dtos/`
 - Application services
@@ -204,6 +235,7 @@ This document outlines the complete project phases for developing a scalable eve
 - Unit tests
 
 ### Estimated Time
+
 5-6 hours (both parts)
 
 ---
@@ -211,6 +243,7 @@ This document outlines the complete project phases for developing a scalable eve
 ## Phase 6: Presentation Layer - REST API (Both Services)
 
 ### Objectives
+
 - Implement REST API in the **producer service** for ingesting logs
 - Implement REST API in the **consumer service** for querying logs
 - Add pagination and filtering to consumer API
@@ -220,9 +253,11 @@ This document outlines the complete project phases for developing a scalable eve
 ### Part A: Producer Service - Ingest API
 
 #### Path
+
 `producer/src/presentation/`
 
 #### Tasks
+
 - [ ] Set up Express.js server in producer service
 - [ ] Implement middleware:
   - Error handling middleware
@@ -237,6 +272,7 @@ This document outlines the complete project phases for developing a scalable eve
 - [ ] Write integration tests
 
 #### Deliverables
+
 - Express.js server setup in producer service
 - POST /api/logs endpoint
 - Health check endpoint
@@ -246,9 +282,11 @@ This document outlines the complete project phases for developing a scalable eve
 ### Part B: Consumer Service - Query API
 
 #### Path
+
 `consumer/src/presentation/`
 
 #### Tasks
+
 - [ ] Set up Express.js server in consumer service
 - [ ] Implement middleware:
   - Error handling middleware
@@ -273,6 +311,7 @@ This document outlines the complete project phases for developing a scalable eve
 - [ ] Write integration tests
 
 #### Deliverables
+
 - Express.js server setup in consumer service
 - GET /api/logs and GET /api/logs/:id endpoints
 - Pagination implementation
@@ -281,6 +320,7 @@ This document outlines the complete project phases for developing a scalable eve
 - Integration tests
 
 ### Estimated Time
+
 6-8 hours (both parts)
 
 ---
@@ -288,11 +328,13 @@ This document outlines the complete project phases for developing a scalable eve
 ## Phase 7: Docker Configuration (Microservices)
 
 ### Objectives
+
 - Containerize both microservices
 - Set up Docker Compose for local development
 - Configure multi-stage builds for optimization
 
 ### Tasks
+
 - [ ] Create Dockerfile for **producer service**:
   - Multi-stage build (builder and production)
   - Optimize image size
@@ -317,6 +359,7 @@ This document outlines the complete project phases for developing a scalable eve
 - [ ] Document Docker commands in README
 
 ### Deliverables
+
 - `producer/Dockerfile`
 - `consumer/Dockerfile`
 - .dockerignore files
@@ -325,6 +368,7 @@ This document outlines the complete project phases for developing a scalable eve
 - Tested containerized microservices
 
 ### Estimated Time
+
 5-6 hours
 
 ---
@@ -332,12 +376,14 @@ This document outlines the complete project phases for developing a scalable eve
 ## Phase 8: Kubernetes Configuration (Microservices)
 
 ### Objectives
+
 - Create Kubernetes manifests for both services
 - Set up deployments, services, and configmaps
 - Configure secrets management
 - Set up ingress (optional)
 
 ### Tasks
+
 - [ ] Create Kubernetes namespace
 - [ ] Create ConfigMaps for application configuration (producer and consumer)
 - [ ] Create Secrets for sensitive data (MongoDB URI, Kafka configs)
@@ -358,6 +404,7 @@ This document outlines the complete project phases for developing a scalable eve
 - [ ] Test deployment locally (minikube/kind) or on cloud
 
 ### Deliverables
+
 - Kubernetes manifests (YAML files) for both services
 - ConfigMaps
 - Secrets configuration
@@ -365,6 +412,7 @@ This document outlines the complete project phases for developing a scalable eve
 - Tested K8s deployment
 
 ### Estimated Time
+
 6-8 hours
 
 ---
@@ -372,11 +420,13 @@ This document outlines the complete project phases for developing a scalable eve
 ## Phase 9: Cloud Deployment (GCP/AWS)
 
 ### Objectives
+
 - Deploy both microservices to cloud platform
 - Set up managed services (MongoDB Atlas, managed Kafka if needed)
 - Configure networking and security
 
 ### Tasks
+
 - [ ] Choose cloud platform (GCP/AWS free tier)
 - [ ] Set up cloud account and billing alerts
 - [ ] Deploy MongoDB (MongoDB Atlas free tier or self-hosted)
@@ -392,12 +442,14 @@ This document outlines the complete project phases for developing a scalable eve
 - [ ] Document deployment process
 
 ### Deliverables
+
 - Deployed microservices on cloud
 - Cloud infrastructure setup
 - Deployment documentation
 - Access URLs and credentials (documented securely)
 
 ### Estimated Time
+
 5-7 hours
 
 ---
@@ -405,11 +457,13 @@ This document outlines the complete project phases for developing a scalable eve
 ## Phase 10: Testing & Quality Assurance
 
 ### Objectives
+
 - Write comprehensive tests for both services
 - Ensure code quality
 - Test end-to-end functionality
 
 ### Tasks
+
 - [ ] Unit tests for **producer service**:
   - Application layer tests
   - Infrastructure layer mocks (Kafka producer)
@@ -436,12 +490,14 @@ This document outlines the complete project phases for developing a scalable eve
 - [ ] Fix bugs and issues
 
 ### Deliverables
+
 - Test suite for both services
 - Test coverage reports
 - Bug fixes
 - Performance test results (if applicable)
 
 ### Estimated Time
+
 7-9 hours
 
 ---
@@ -449,11 +505,13 @@ This document outlines the complete project phases for developing a scalable eve
 ## Phase 11: Documentation & README
 
 ### Objectives
+
 - Create comprehensive README
 - Document architecture decisions
 - Provide setup instructions
 
 ### Tasks
+
 - [ ] Write README.md with sections:
   - Project description
   - Microservices architecture overview
@@ -479,12 +537,14 @@ This document outlines the complete project phases for developing a scalable eve
 - [ ] Create CHANGELOG.md (optional)
 
 ### Deliverables
+
 - Complete README.md
 - Architecture documentation
 - Setup guides
 - API documentation
 
 ### Estimated Time
+
 4-5 hours
 
 ---
@@ -492,11 +552,13 @@ This document outlines the complete project phases for developing a scalable eve
 ## Phase 12: Demo Video Recording
 
 ### Objectives
+
 - Record end-to-end demonstration
 - Showcase all features
 - Explain architecture and implementation
 
 ### Tasks
+
 - [ ] Prepare demo script:
   - Introduction
   - Microservices architecture overview
@@ -517,11 +579,13 @@ This document outlines the complete project phases for developing a scalable eve
 - [ ] Get shareable link
 
 ### Deliverables
+
 - Demo video (5-10 minutes)
 - Video URL/link
 - Clear English voiceover (mandatory)
 
 ### Estimated Time
+
 2-3 hours
 
 ---
@@ -529,11 +593,13 @@ This document outlines the complete project phases for developing a scalable eve
 ## Phase 13: Final Review & Submission
 
 ### Objectives
+
 - Review all deliverables
 - Ensure all requirements are met
 - Submit project
 
 ### Tasks
+
 - [ ] Final code review for both services
 - [ ] Verify all requirements:
   - ✅ Kafka producer (producer service) and consumer (consumer service)
@@ -551,14 +617,16 @@ This document outlines the complete project phases for developing a scalable eve
 - [ ] Ensure code is production-ready
 - [ ] Push final code to GitHub
 - [ ] Verify GitHub repo is public and accessible
-- [ ] Submit via form: https://forms.gle/WNrJQkhP61RyjLu58
+- [ ] Submit via form: <https://forms.gle/WNrJQkhP61RyjLu58>
 
 ### Deliverables
+
 - Clean, production-ready code
 - All deliverables verified
 - Project submission
 
 ### Estimated Time
+
 2-3 hours
 
 ---
@@ -566,9 +634,11 @@ This document outlines the complete project phases for developing a scalable eve
 ## Summary
 
 ### Total Estimated Time
+
 55-75 hours (depending on experience level)
 
 ### Key Requirements Checklist
+
 - [x] Node.js + Express microservices (producer & consumer)
 - [x] Kafka producer and consumer (split across services)
 - [x] MongoDB with proper indexing (consumer service)
@@ -583,6 +653,7 @@ This document outlines the complete project phases for developing a scalable eve
 - [x] Architecture write-up
 
 ### Technology Stack
+
 - **Runtime:** Node.js (v18+)
 - **Language:** TypeScript
 - **Framework:** Express.js
@@ -597,6 +668,7 @@ This document outlines the complete project phases for developing a scalable eve
 ### Microservices Architecture
 
 #### Producer Service Structure
+
 ```
 producer/
 ├── src/
@@ -615,6 +687,7 @@ producer/
 ```
 
 #### Consumer Service Structure
+
 ```
 consumer/
 ├── src/
@@ -642,6 +715,7 @@ consumer/
 ### Service Responsibilities
 
 #### Producer Service (API Gateway)
+
 - **Purpose:** Ingest user activity logs via REST API
 - **Responsibilities:**
   - Receive POST requests at `/api/logs`
@@ -651,6 +725,7 @@ consumer/
 - **No Domain Logic:** This is a thin API layer
 
 #### Consumer Service (Domain & Persistence)
+
 - **Purpose:** Process events and manage data
 - **Responsibilities:**
   - Consume messages from Kafka topic
@@ -665,7 +740,7 @@ consumer/
 ## Notes
 
 1. **Deadline:** Thursday, 15th Jan, 8 PM
-2. **Submission Form:** https://forms.gle/WNrJQkhP61RyjLu58
+2. **Submission Form:** <https://forms.gle/WNrJQkhP61RyjLu58>
 3. **Video Requirement:** Must have clear English voiceover (videos without voice will be ignored)
 4. **Focus Areas:**
    - Code quality and structure
