@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: producer-config
+  namespace: eyego-task
+data:
+  PORT: "3000"
+  NODE_ENV: "production"
+  KAFKA_BROKERS: "kafka-service:9092"

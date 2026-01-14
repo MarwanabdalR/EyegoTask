@@ -57,6 +57,44 @@ services:
       - eyego-network
     restart: unless-stopped
 
+  # Producer Service
+  producer:
+    build:
+      context: ./producer
+      dockerfile: Dockerfile
+    container_name: eyego-producer
+    depends_on:
+      - kafka
+    ports:
+      - "3000:3000"
+    environment:
+      PORT: 3000
+      KAFKA_BROKERS: kafka:9093
+      NODE_ENV: production
+    networks:
+      - eyego-network
+    restart: unless-stopped
+
+  # Consumer Service
+  consumer:
+    build:
+      context: ./consumer
+      dockerfile: Dockerfile
+    container_name: eyego-consumer
+    depends_on:
+      - kafka
+      - mongodb
+    ports:
+      - "3001:3001"
+    environment:
+      PORT: 3001
+      KAFKA_BROKERS: kafka:9093
+      MONGO_URI: mongodb://admin:admin123@mongodb:27017/eyego?authSource=admin
+      NODE_ENV: production
+    networks:
+      - eyego-network
+    restart: unless-stopped
+
   # Kafka UI for Visualization
   kafka-ui:
     image: provectuslabs/kafka-ui:latest
