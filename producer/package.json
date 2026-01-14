@@ -1,16 +1,25 @@
 {
   "dependencies": {
+    "cors": "^2.8.5",
     "dotenv": "^17.2.3",
+    "express": "^5.2.1",
+    "helmet": "^8.1.0",
     "kafkajs": "^2.2.4",
+    "morgan": "^1.10.1",
     "uuid": "^9.0.1",
     "zod": "^4.3.5"
   },
   "scripts": {
-    "test": "jest"
+    "test": "jest",
+    "start": "ts-node src/presentation/http/server.ts",
+    "dev": "ts-node src/presentation/http/server.ts"
   },
   "devDependencies": {
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.6",
     "@types/jest": "^30.0.0",
-    "@types/node": "^25.0.7",
+    "@types/morgan": "^1.9.10",
+    "@types/node": "^25.0.8",
     "@types/uuid": "^9.0.7",
     "jest": "^30.2.0",
     "ts-jest": "^29.4.6",

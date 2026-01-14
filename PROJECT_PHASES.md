@@ -269,7 +269,6 @@ This document outlines the complete project phases for developing a scalable eve
   - GET /api/health - Health check endpoint
 - [ ] Implement API response formatting
 - [ ] Add Swagger/OpenAPI documentation (optional but recommended)
-- [ ] Write integration tests
 
 #### Deliverables
 
@@ -277,7 +276,6 @@ This document outlines the complete project phases for developing a scalable eve
 - POST /api/logs endpoint
 - Health check endpoint
 - API documentation
-- Integration tests
 
 ### Part B: Consumer Service - Query API
 
@@ -287,28 +285,27 @@ This document outlines the complete project phases for developing a scalable eve
 
 #### Tasks
 
-- [ ] Set up Express.js server in consumer service
-- [ ] Implement middleware:
+- [x] Set up Express.js server in consumer service
+- [x] Implement middleware:
   - Error handling middleware
   - Request validation middleware
   - Logging middleware
   - CORS configuration
-- [ ] Create REST API endpoints:
+- [x] Create REST API endpoints:
   - GET /api/logs - Get logs with pagination and filtering
   - GET /api/logs/:id - Get log by ID
   - GET /api/health - Health check endpoint
-- [ ] Implement pagination:
+- [x] Implement pagination:
   - Query parameters: page, limit
   - Response metadata: total, page, limit, hasNext, hasPrev
-- [ ] Implement filtering:
+- [x] Implement filtering:
   - Filter by userId
   - Filter by activityType
   - Filter by date range (from, to)
   - Sort by timestamp (asc/desc)
-- [ ] Add input validation for query parameters
-- [ ] Implement API response formatting
-- [ ] Add Swagger/OpenAPI documentation (optional but recommended)
-- [ ] Write integration tests
+- [x] Add input validation for query parameters
+- [x] Implement API response formatting
+- [x] Add Swagger/OpenAPI documentation (optional but recommended)
 
 #### Deliverables
 
@@ -317,7 +314,6 @@ This document outlines the complete project phases for developing a scalable eve
 - Pagination implementation
 - Filtering implementation
 - API documentation
-- Integration tests
 
 ### Estimated Time
 
