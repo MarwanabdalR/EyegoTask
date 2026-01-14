@@ -1,16 +1,12 @@
 import { Kafka, Consumer } from 'kafkajs';
-import { UserActivityLogRepository } from '../../domain/repositories/UserActivityLogRepository';
 import { MongoUserActivityLogRepository } from '../database/repositories/MongoUserActivityLogRepository';
-import { UserActivityLog } from '../../domain/entities/UserActivityLog';
-import { ActivityType } from '../../domain/value-objects/ActivityType';
-import { UserId } from '../../domain/value-objects/UserId';
-import { LogTimestamp } from '../../domain/value-objects/LogTimestamp';
-import { Metadata } from '../../domain/value-objects/Metadata';
+
+import { ProcessUserActivityLogUseCase } from '../../application/use-cases/ProcessUserActivityLogUseCase';
 
 export class KafkaConsumer {
     private static instance: KafkaConsumer;
     private consumer: Consumer;
-    private repository: UserActivityLogRepository;
+    private messageProcessor: ProcessUserActivityLogUseCase;
     private isConnected: boolean = false;
 
     private constructor() {
@@ -25,7 +21,8 @@ export class KafkaConsumer {
         });
 
         this.consumer = kafka.consumer({ groupId: 'consumer-service-group' });
-        this.repository = new MongoUserActivityLogRepository();
+        const repository = new MongoUserActivityLogRepository();
+        this.messageProcessor = new ProcessUserActivityLogUseCase(repository);
     }
 
     public static getInstance(): KafkaConsumer {
@@ -68,15 +65,8 @@ export class KafkaConsumer {
                         const payload = JSON.parse(message.value.toString());
                         console.log(`Received message on ${topic}:`, payload);
 
-                        const log = new UserActivityLog({
-                            userId: new UserId(payload.userId),
-                            activityType: new ActivityType(payload.activityType),
-                            metadata: new Metadata(payload.metadata),
-                            timestamp: new LogTimestamp(new Date(payload.timestamp))
-                        });
-
-                        await this.repository.save(log);
-                        console.log('Processed and saved log:', log.eventId.toString());
+                        await this.messageProcessor.execute(payload);
+                        console.log('Processed log for user:', payload.userId);
 
                     } catch (error) {
                         console.error('Error processing message:', error);

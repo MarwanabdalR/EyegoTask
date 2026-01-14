@@ -194,12 +194,12 @@ This document outlines the complete project phases for developing a scalable eve
 
 #### Tasks
 
-- [ ] Create use cases:
+- [x] Create use cases:
   - PublishUserActivityLogUseCase
-- [ ] Implement DTOs (Data Transfer Objects) for incoming requests
-- [ ] Add input validation (Zod or class-validator)
-- [ ] Implement error handling and mapping
-- [ ] Write unit tests for use cases
+- [x] Implement DTOs (Data Transfer Objects) for incoming requests
+- [x] Add input validation (Zod or class-validator)
+- [x] Implement error handling and mapping
+- [x] Write unit tests for use cases
 
 #### Deliverables
 
@@ -216,15 +216,15 @@ This document outlines the complete project phases for developing a scalable eve
 
 #### Tasks
 
-- [ ] Create use cases:
+- [x] Create use cases:
   - ProcessUserActivityLogUseCase (triggered by Kafka consumer)
   - GetUserActivityLogsUseCase
   - GetUserActivityLogByIdUseCase
-- [ ] Implement DTOs (Data Transfer Objects)
-- [ ] Implement application services
-- [ ] Add input validation (Zod or class-validator)
-- [ ] Implement error handling and mapping
-- [ ] Write unit tests for use cases
+- [x] Implement DTOs (Data Transfer Objects)
+- [x] Implement application services
+- [x] Add input validation (Zod or class-validator)
+- [x] Implement error handling and mapping
+- [x] Write unit tests for use cases
 
 #### Deliverables
 

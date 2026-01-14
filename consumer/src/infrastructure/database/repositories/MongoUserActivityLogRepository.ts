@@ -27,6 +27,19 @@ export class MongoUserActivityLogRepository implements UserActivityLogRepository
         return docs.map((doc) => this.toDomain(doc));
     }
 
+    async findAll(filter: any, options: { page: number; limit: number; sort?: any }): Promise<{ logs: UserActivityLog[]; total: number }> {
+        const skip = (options.page - 1) * options.limit;
+        const [docs, total] = await Promise.all([
+            UserActivityLogModel.find(filter).sort(options.sort || { timestamp: -1 }).skip(skip).limit(options.limit),
+            UserActivityLogModel.countDocuments(filter)
+        ]);
+
+        return {
+            logs: docs.map(doc => this.toDomain(doc)),
+            total
+        };
+    }
+
     private toPersistence(log: UserActivityLog): any {
         return {
             userId: log.userId.toString(),
