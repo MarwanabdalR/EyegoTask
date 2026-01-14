@@ -72,7 +72,7 @@ This document outlines the complete project phases for developing a scalable eve
 
 ---
 
-## Phase 3: Infrastructure Layer - MongoDB Integration (Consumer Service) 
+## Phase 3: Infrastructure Layer - MongoDB Integration (Consumer Service)
 
 ### Objectives
 
@@ -129,15 +129,15 @@ This document outlines the complete project phases for developing a scalable eve
 
 #### Tasks
 
-- [ ] Set up Kafka client library (kafkajs) in producer service
-- [ ] Configure Kafka producer:
+- [x] Set up Kafka client library (kafkajs) in producer service
+- [x] Configure Kafka producer:
   - Connection settings
   - Topic configuration
-  - Serialization (JSON/Avro)
+  - Serialization (JSON)
   - Error handling and retries
-- [ ] Implement message schema validation
-- [ ] Create Kafka producer utility modules
-- [ ] Write unit tests for Kafka producer
+- [x] Implement message schema validation
+- [x] Create Kafka producer utility modules
+- [x] Write integration tests for Kafka producer
 
 #### Deliverables
 
@@ -154,16 +154,16 @@ This document outlines the complete project phases for developing a scalable eve
 
 #### Tasks
 
-- [ ] Set up Kafka client library (kafkajs) in consumer service
-- [ ] Configure Kafka consumer:
+- [x] Set up Kafka client library (kafkajs) in consumer service
+- [x] Configure Kafka consumer:
   - Consumer group configuration
   - Topic subscription
   - Message processing and domain logic integration
   - Error handling and dead letter queue (optional)
   - Commit strategies
-- [ ] Implement message deserialization
-- [ ] Connect consumer to domain layer (trigger use cases)
-- [ ] Write unit tests for Kafka consumer
+- [x] Implement message deserialization
+- [x] Connect consumer to domain layer (trigger use cases)
+- [x] Write unit tests for Kafka consumer
 
 #### Deliverables
 

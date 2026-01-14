@@ -30,7 +30,12 @@ export class DatabaseConnection {
                 throw new Error('MongoDB connection string is not defined. Please check MONGO_URI in .env file or pass the URI explicitly.');
             }
 
-            await mongoose.connect(connectionString);
+            await mongoose.connect(connectionString, {
+                serverSelectionTimeoutMS: 5000,
+                connectTimeoutMS: 10000,
+                directConnection: true,
+                family: 4 // Force IPv4
+            });
             console.log('MongoDB connected successfully.');
         } catch (error) {
             console.error('MongoDB connection error:', error);
