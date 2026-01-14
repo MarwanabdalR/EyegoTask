@@ -5,12 +5,16 @@ WORKDIR /app
 
 # Copy package files
 COPY package*.json ./
+COPY tsconfig.json ./
 
 # Install all dependencies
 RUN npm ci
 
 # Copy source code
 COPY . .
+
+# Compile TypeScript to JavaScript
+RUN npx tsc
 
 # Production stage
 FROM node:18-alpine
@@ -21,12 +25,11 @@ WORKDIR /app
 # Copy package files
 COPY package*.json ./
 
-# Install production dependencies + ts-node and typescript for runtime
-RUN npm ci --only=production && \
-    npm install ts-node typescript
+# Install production dependencies only
+RUN npm ci --only=production
 
-# Copy source code from builder
-COPY --from=builder /app/src ./src
+# Copy compiled JavaScript from builder
+COPY --from=builder /app/dist ./dist
 
 # Create non-root user
 RUN addgroup -g 1001 -S nodejs && \
@@ -45,5 +48,5 @@ EXPOSE 3000
 HEALTHCHECK --interval=30s --timeout=3s --start-period=40s --retries=3 \
     CMD node -e "require('http').get('http://localhost:3000/api/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"
 
-# Start application
-CMD ["npm", "start"]
+# Start application with compiled JavaScript
+CMD ["node", "dist/presentation/http/server.js"]

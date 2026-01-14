@@ -18,6 +18,12 @@
     "experimentalDecorators": true, // بيفعلوا ميزة  Decorators (زي @Entity, @Controller).
     "emitDecoratorMetadata": true
   },
+  "ts-node": {
+    "esm": false,
+    "compilerOptions": {
+      "module": "commonjs"
+    }
+  },
   "include": [
     "src/**/*"
   ],

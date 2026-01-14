@@ -6,4 +6,4 @@ metadata:
 data:
   PORT: "3001"
   NODE_ENV: "production"
-  KAFKA_BROKERS: "kafka-service:9092"
+  KAFKA_BROKERS: "kafka-0.kafka-service.eyego-task.svc.cluster.local:9092"

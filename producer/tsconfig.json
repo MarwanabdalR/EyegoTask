@@ -9,6 +9,12 @@
         "skipLibCheck": true,
         "forceConsistentCasingInFileNames": true
     },
+    "ts-node": {
+        "esm": false,
+        "compilerOptions": {
+            "module": "commonjs"
+        }
+    },
     "include": [
         "src/**/*"
     ],
