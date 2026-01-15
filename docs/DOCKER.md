@@ -1,271 +1,188 @@
 # Docker Setup Guide
 
-This guide explains how to build and run the EyegoTask microservices using Docker.
+Quick guide for running Eyego Task microservices with Docker.
 
-## Prerequisites
-
-- Docker Desktop installed and running
-- Docker Compose v2.0+
+---
 
 ## Quick Start
 
-### 1. Build and Start All Services
-
 ```bash
-docker-compose up --build
-```
-
-This command will:
-
-- Build Docker images for Producer and Consumer services
-- Start MongoDB, Kafka (with Zookeeper), Producer, Consumer, and Kafka UI
-- Create a shared network for all services
-
-### 2. Verify Services
-
-Check that all services are running:
-
-```bash
-docker-compose ps
-```
-
-You should see:
-
-- `eyego-mongodb` (port 27017)
-- `eyego-zookeeper` (port 2181)
-- `eyego-kafka` (ports 9092, 9093)
-- `eyego-producer` (port 3000)
-- `eyego-consumer` (port 3001)
-- `eyego-kafka-ui` (port 8080)
-
-### 3. Test the Services
-
-**Producer Health Check**:
-
-```bash
-curl http://localhost:3000/api/health
-```
-
-**Consumer Health Check**:
-
-```bash
-curl http://localhost:3001/api/health
-```
-
-**Publish a Log**:
-
-```bash
-curl -X POST http://localhost:3000/api/logs \
-  -H "Content-Type: application/json" \
-  -d '{
-    "userId": "user-123",
-    "activityType": "LOGIN",
-    "metadata": {"device": "mobile"}
-  }'
-```
-
-**Retrieve Logs**:
-
-```bash
-curl http://localhost:3001/api/logs?page=1&limit=10
-```
-
-## Individual Service Commands
-
-### Build Images
-
-**Producer**:
-
-```bash
-docker build -t eyego-producer ./producer
-```
-
-**Consumer**:
-
-```bash
-docker build -t eyego-consumer ./consumer
-```
-
-### Run Individual Containers
-
-**Producer** (requires Kafka running):
-
-```bash
-docker run -p 3000:3000 \
-  -e KAFKA_BROKERS=kafka:9093 \
-  --network eyego-network \
-  eyego-producer
-```
-
-**Consumer** (requires Kafka and MongoDB running):
-
-```bash
-docker run -p 3001:3001 \
-  -e KAFKA_BROKERS=kafka:9093 \
-  -e MONGO_URI=mongodb://admin:admin123@mongodb:27017/eyego?authSource=admin \
-  --network eyego-network \
-  eyego-consumer
-```
-
-## Docker Compose Commands
-
-### Start Services (Detached Mode)
-
-```bash
+# Start all services
 docker-compose up -d
-```
 
-### Stop Services
+# Check status
+docker-compose ps
 
-```bash
+# View logs
+docker-compose logs -f
+
+# Stop services
 docker-compose down
 ```
 
-### Stop and Remove Volumes
+---
+
+## Services
+
+| Service | Port | Description |
+|---------|------|-------------|
+| Producer | 3000 | Publish logs API |
+| Consumer | 3001 | Query logs API |
+| MongoDB | 27017 | Database |
+| Kafka | 9092-9093 | Message broker |
+| Zookeeper | 2181 | Kafka coordination |
+| Kafka UI | 8080 | Kafka monitoring |
+
+**Access URLs**:
+
+- Producer: <http://localhost:3000>
+- Consumer: <http://localhost:3001>
+- Kafka UI: <http://localhost:8080>
+- MongoDB: `mongodb://admin:admin123@localhost:27017`
+
+---
+
+## Docker Architecture
+
+### Multi-Stage Build
+
+Both services use multi-stage builds:
+
+1. **Builder**: Compiles TypeScript → JavaScript
+2. **Production**: Runs compiled JavaScript
+
+**Benefits**: Smaller images, faster startup, no ts-node overhead
+
+### Dockerfile Structure
+
+```dockerfile
+# Stage 1: Build
+FROM node:18-alpine AS builder
+WORKDIR /app
+COPY package*.json tsconfig.json ./
+RUN npm ci
+COPY . .
+RUN npx tsc
+
+# Stage 2: Production
+FROM node:18-alpine
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci --only=production
+COPY --from=builder /app/dist ./dist
+RUN addgroup -g 1001 -S nodejs && adduser -S nodejs -u 1001
+RUN chown -R nodejs:nodejs /app
+USER nodejs
+EXPOSE 3000
+CMD ["node", "dist/presentation/http/server.js"]
+```
+
+---
+
+## Common Commands
 
 ```bash
+# Start services
+docker-compose up -d
+
+# Rebuild and start
+docker-compose up --build -d
+
+# View logs
+docker-compose logs -f producer
+docker-compose logs -f consumer
+
+# Restart service
+docker-compose restart producer
+
+# Stop all
+docker-compose down
+
+# Stop and remove volumes
 docker-compose down -v
 ```
 
-### View Logs
-
-**All services**:
-
-```bash
-docker-compose logs -f
-```
-
-**Specific service**:
-
-```bash
-docker-compose logs -f producer
-docker-compose logs -f consumer
-```
-
-### Rebuild Services
-
-```bash
-docker-compose up --build
-```
-
-### Scale Services
-
-```bash
-docker-compose up --scale consumer=3
-```
+---
 
 ## Environment Variables
 
-### Producer Service
+### Producer
 
-- `PORT`: HTTP server port (default: 3000)
-- `KAFKA_BROKERS`: Kafka broker addresses (default: kafka:9093)
-- `NODE_ENV`: Environment (production/development)
+- `PORT`: 3000
+- `KAFKA_BROKERS`: kafka:9093
+- `NODE_ENV`: production
 
-### Consumer Service
+### Consumer
 
-- `PORT`: HTTP server port (default: 3001)
-- `KAFKA_BROKERS`: Kafka broker addresses (default: kafka:9093)
-- `MONGO_URI`: MongoDB connection string
-- `NODE_ENV`: Environment (production/development)
+- `PORT`: 3001
+- `KAFKA_BROKERS`: kafka:9093
+- `KAFKA_GROUP_ID`: consumer-service-group
+- `MONGODB_URI`: mongodb://admin:admin123@mongodb:27017/eyego?authSource=admin
+- `NODE_ENV`: production
 
-## Monitoring
+---
 
-### Kafka UI
-
-Access Kafka UI at: <http://localhost:8080>
-
-View:
-
-- Topics
-- Messages
-- Consumer groups
-- Broker status
-
-### Health Checks
-
-Docker automatically monitors service health using the configured health checks:
-
-**Producer**: `GET http://localhost:3000/api/health`
-**Consumer**: `GET http://localhost:3001/api/health`
-
-View health status:
+## Testing
 
 ```bash
-docker inspect eyego-producer | grep -A 5 Health
-docker inspect eyego-consumer | grep -A 5 Health
+# Health checks
+curl http://localhost:3000/api/health
+curl http://localhost:3001/api/health
+
+# Publish log
+curl -X POST http://localhost:3000/api/logs \
+  -H "Content-Type: application/json" \
+  -d '{"userId":"user-123","activityType":"LOGIN","metadata":{"device":"mobile"}}'
+
+# Query logs
+curl http://localhost:3001/api/logs?userId=user-123
 ```
+
+---
 
 ## Troubleshooting
 
-### Services Not Starting
-
-1. Check logs:
+### Services not starting
 
 ```bash
+# Check logs
 docker-compose logs producer
-docker-compose logs consumer
+
+# Rebuild
+docker-compose up --build -d
 ```
 
-1. Verify network:
+### Connection issues
 
 ```bash
-docker network ls
-docker network inspect eyego-network
+# Check network
+docker network inspect eyegotask_eyego-network
+
+# Test connectivity
+docker exec eyego-producer ping kafka
 ```
 
-### Connection Issues
-
-**Kafka connection errors**:
-
-- Ensure Kafka is fully started before Producer/Consumer
-- Check `KAFKA_BROKERS` environment variable
-- Verify network connectivity: `docker-compose exec producer ping kafka`
-
-**MongoDB connection errors**:
-
-- Verify MongoDB credentials in `MONGO_URI`
-- Check MongoDB is running: `docker-compose ps mongodb`
-
-### Clean Restart
+### Clean restart
 
 ```bash
-# Stop all services
-docker-compose down
-
-# Remove all containers, networks, and volumes
 docker-compose down -v
-
-# Rebuild and start
-docker-compose up --build
+docker-compose up --build -d
 ```
 
-## Production Considerations
+---
 
-1. **Environment Variables**: Use `.env` files or secrets management
-2. **Volumes**: Persist data with named volumes (already configured for MongoDB)
-3. **Resource Limits**: Add memory and CPU limits in docker-compose.yml
-4. **Logging**: Configure log drivers for centralized logging
-5. **Health Checks**: Already configured, monitor in production
-6. **Security**: Use non-root users (already configured in Dockerfiles)
+## Backup MongoDB
 
-## Architecture
+```bash
+# Backup
+docker exec eyego-mongodb mongodump \
+  -u admin -p admin123 \
+  --authenticationDatabase admin \
+  --db eyego --out /backup
 
+# Restore
+docker exec eyego-mongodb mongorestore \
+  -u admin -p admin123 \
+  --authenticationDatabase admin \
+  --db eyego /backup/eyego
 ```
-┌─────────────┐
-│   Producer  │ :3000
-└──────┬──────┘
-       │
-       ▼
-┌─────────────┐
-│    Kafka    │ :9092, :9093
-└──────┬──────┘
-       │
-       ▼
-┌─────────────┐     ┌─────────────┐
-│  Consumer   │────▶│   MongoDB   │
-│    :3001    │     │    :27017   │
-└─────────────┘     └─────────────┘
-```
-
-All services communicate via the `eyego-network` Docker network.

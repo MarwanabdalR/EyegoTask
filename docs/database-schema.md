@@ -1,273 +1,277 @@
-# Database Schema Design - User Activity Logs
+# MongoDB Database Schema
 
-## Overview
+## Database Configuration
 
-This document outlines the MongoDB schema design for storing user activity logs in the Eyego Task microservice. The schema is designed for efficient querying, indexing, and scalability.
+- **Database Name**: `eyego`
+- **Collection**: `useractivitylogs`
+- **Connection String**: `mongodb://admin:admin123@localhost:27017/eyego?authSource=admin`
 
-## Collection: `user_activity_logs`
+---
 
-### Document Structure
+## Schema Structure
+
+### Document Format
 
 ```json
 {
-  "_id": ObjectId,           // MongoDB auto-generated
-  "userId": String,          // Required: User identifier
-  "activityType": String,    // Required: Type of activity (e.g., "login", "view_page", "purchase")
-  "timestamp": Date,         // Required: When the activity occurred (ISO 8601)
-  "metadata": Object,        // Optional: Additional activity-specific data
-  "sessionId": String,       // Optional: Session identifier for grouping related activities
-  "ipAddress": String,       // Optional: Client IP address
-  "userAgent": String,       // Optional: Browser/client user agent
-  "createdAt": Date,         // Auto-generated: Document creation timestamp
-  "updatedAt": Date          // Auto-generated: Document update timestamp
+  "_id": "ObjectId",
+  "eventId": "550e8400-e29b-41d4-a716-446655440000",
+  "userId": "user-123",
+  "activityType": "LOGIN",
+  "metadata": {
+    "device": "mobile",
+    "ip": "192.168.1.1",
+    "location": "New York"
+  },
+  "timestamp": "2026-01-15T03:00:00.000Z",
+  "createdAt": "2026-01-15T03:00:01.234Z",
+  "updatedAt": "2026-01-15T03:00:01.234Z"
 }
 ```
 
-### Field Descriptions
+### Field Definitions
 
-| Field | Type | Required | Description | Example |
-|-------|------|----------|-------------|---------|
-| `_id` | ObjectId | Auto | MongoDB document ID | `507f1f77bcf86cd799439011` |
-| `userId` | String | Yes | Unique identifier for the user | `"user123"` |
-| `activityType` | String | Yes | Type of user activity | `"login"`, `"page_view"`, `"purchase"` |
-| `timestamp` | Date | Yes | Activity timestamp in UTC | `"2024-01-12T10:30:00.000Z"` |
-| `metadata` | Object | No | Flexible object for activity-specific data | `{"productId": "prod123", "amount": 99.99}` |
-| `sessionId` | String | No | Session identifier for grouping activities | `"sess_abc123"` |
-| `ipAddress` | String | No | Client IP address | `"192.168.1.1"` |
-| `userAgent` | String | No | Browser/client user agent string | `"Mozilla/5.0..."` |
-| `createdAt` | Date | Auto | Document creation timestamp | `"2024-01-12T10:30:00.000Z"` |
-| `updatedAt` | Date | Auto | Document update timestamp | `"2024-01-12T10:30:00.000Z"` |
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `_id` | ObjectId | Auto | MongoDB unique identifier |
+| `eventId` | String (UUID) | Yes | Unique event identifier |
+| `userId` | String | Yes | User identifier |
+| `activityType` | Enum | Yes | Type of activity (see below) |
+| `metadata` | Object | No | Additional context data |
+| `timestamp` | Date | Yes | When activity occurred (ISO 8601) |
+| `createdAt` | Date | Auto | Document creation time |
+| `updatedAt` | Date | Auto | Document update time |
 
-### Validation Rules
+### Activity Types
 
-#### Schema Validation (MongoDB)
+- `LOGIN` - User login
+- `LOGOUT` - User logout
+- `PAGE_VIEW` - Page view
+- `BUTTON_CLICK` - Button interaction
+- `FORM_SUBMIT` - Form submission
+- `API_CALL` - API request
+- `ERROR` - Error event
 
-```javascript
-db.createCollection("user_activity_logs", {
-  validator: {
-    $jsonSchema: {
-      bsonType: "object",
-      required: ["userId", "activityType", "timestamp"],
-      properties: {
-        userId: {
-          bsonType: "string",
-          description: "User identifier is required and must be a string"
-        },
-        activityType: {
-          bsonType: "string",
-          description: "Activity type is required and must be a string"
-        },
-        timestamp: {
-          bsonType: "date",
-          description: "Timestamp is required and must be a valid date"
-        },
-        metadata: {
-          bsonType: "object",
-          description: "Metadata must be an object if provided"
-        },
-        sessionId: {
-          bsonType: "string",
-          description: "Session ID must be a string if provided"
-        },
-        ipAddress: {
-          bsonType: "string",
-          description: "IP address must be a string if provided"
-        },
-        userAgent: {
-          bsonType: "string",
-          description: "User agent must be a string if provided"
-        }
-      }
-    }
-  }
-});
-```
+---
 
-#### Mongoose Schema (TypeScript)
+## Mongoose Schema Configuration
 
 ```typescript
 import mongoose, { Schema, Document } from 'mongoose';
 
 export interface IUserActivityLog extends Document {
+  eventId: string;
   userId: string;
   activityType: string;
-  timestamp: Date;
   metadata?: Record<string, any>;
-  sessionId?: string;
-  ipAddress?: string;
-  userAgent?: string;
+  timestamp: Date;
   createdAt: Date;
   updatedAt: Date;
 }
 
-const UserActivityLogSchema: Schema = new Schema({
+const UserActivityLogSchema = new Schema({
+  eventId: {
+    type: String,
+    required: true,
+    unique: true,
+    index: true
+  },
   userId: {
     type: String,
-    required: true
+    required: true,
+    index: true
   },
   activityType: {
     type: String,
-    required: true
-  },
-  timestamp: {
-    type: Date,
-    required: true
+    required: true,
+    enum: ['LOGIN', 'LOGOUT', 'PAGE_VIEW', 'BUTTON_CLICK', 'FORM_SUBMIT', 'API_CALL', 'ERROR'],
+    index: true
   },
   metadata: {
     type: Schema.Types.Mixed,
     default: {}
   },
-  sessionId: {
-    type: String,
+  timestamp: {
+    type: Date,
+    required: true,
     index: true
-  },
-  ipAddress: {
-    type: String
-  },
-  userAgent: {
-    type: String
   }
 }, {
-  timestamps: true, // Adds createdAt and updatedAt
-  collection: 'user_activity_logs'
+  timestamps: true,
+  collection: 'useractivitylogs'
 });
 
-// Indexes
-// Compound indexes are preferred to avoid redundant single-field indexes.
-UserActivityLogSchema.index({ userId: 1, timestamp: -1 }); // Compound index for user queries (covers userId + timestamp)
-UserActivityLogSchema.index({ activityType: 1, timestamp: -1 }); // Compound index for activity type queries
-UserActivityLogSchema.index({ userId: 1, activityType: 1, timestamp: -1 }); // Composite index for complex filters
-// TTL index for data retention: documents older than 30 days will be removed automatically
-UserActivityLogSchema.index({ timestamp: 1 }, { expireAfterSeconds: 60 * 60 * 24 * 30 }); // 30 days TTL
-UserActivityLogSchema.index({ sessionId: 1 }); // Index for session-based queries
+// Compound indexes for efficient querying
+UserActivityLogSchema.index({ userId: 1, timestamp: -1 });
+UserActivityLogSchema.index({ activityType: 1, timestamp: -1 });
 
-export const UserActivityLogModel = mongoose.model<IUserActivityLog>('UserActivityLog', UserActivityLogSchema);
+export const UserActivityLogModel = mongoose.model<IUserActivityLog>(
+  'UserActivityLog',
+  UserActivityLogSchema
+);
 ```
 
-## Indexes
+---
+
+## Index Configuration
 
 ### Required Indexes
 
-1. **Single Field Indexes**
-   - `timestamp`: For time-based sorting and filtering (also used for TTL)
-   - `sessionId`: For session-based grouping
+```javascript
+// Single field indexes
+db.useractivitylogs.createIndex({ eventId: 1 }, { unique: true })
+db.useractivitylogs.createIndex({ userId: 1 })
+db.useractivitylogs.createIndex({ activityType: 1 })
+db.useractivitylogs.createIndex({ timestamp: -1 })
 
-   Note: Standalone single-field indexes for `userId` and `activityType` were intentionally removed because they are covered by compound indexes (e.g. `{ userId: 1, timestamp: -1 }`). This reduces index overhead while preserving query performance.
-2. **Compound Indexes**
-   - `{ userId: 1, timestamp: -1 }`: For user's activity history (sorted by time desc)
-   - `{ activityType: 1, timestamp: -1 }`: For activity type analysis (sorted by time desc)
-   - `{ userId: 1, activityType: 1, timestamp: -1 }`: For complex filtering
+// Compound indexes for common queries
+db.useractivitylogs.createIndex({ userId: 1, timestamp: -1 })
+db.useractivitylogs.createIndex({ activityType: 1, timestamp: -1 })
+```
 
-### Index Strategy Rationale
+### Index Purpose
 
-- **userId index**: Essential for user-specific queries
-- **activityType index**: Needed for analytics and filtering by activity
-- **timestamp index**: Required for time-based pagination and date range queries
-- **Compound indexes**: Optimize common query patterns like "recent activities for user X" or "login activities in date range"
+- **eventId**: Ensure uniqueness, fast lookup
+- **userId**: User-specific queries
+- **activityType**: Filter by activity type
+- **timestamp**: Time-based sorting and filtering
+- **Compound indexes**: Optimize common query patterns
 
-## Query Patterns
+---
 
-### Common Queries
+## Database Connection Setup
 
-1. **Get user's recent activities**
-   ```javascript
-   db.user_activity_logs.find({ userId: "user123" })
-     .sort({ timestamp: -1 })
-     .limit(10);
-   ```
+### Environment Variables
 
-2. **Get activities by type and date range**
-   ```javascript
-   db.user_activity_logs.find({
-     activityType: "login",
-     timestamp: {
-       $gte: new Date("2024-01-01"),
-       $lt: new Date("2024-02-01")
-     }
-   });
-   ```
+```bash
+MONGODB_URI=mongodb://admin:admin123@mongodb:27017/eyego?authSource=admin
+```
 
-3. **Get activities for a session**
-   ```javascript
-   db.user_activity_logs.find({ sessionId: "sess_abc123" })
-     .sort({ timestamp: 1 });
-   ```
+### Connection Code
 
-4. **Analytics: Activity counts by type**
-   ```javascript
-   db.user_activity_logs.aggregate([
-     {
-       $group: {
-         _id: "$activityType",
-         count: { $sum: 1 }
-       }
-     }
-   ]);
-   ```
+```typescript
+import mongoose from 'mongoose';
 
-## Data Considerations
+export async function connectDatabase(): Promise<void> {
+  const uri = process.env.MONGODB_URI || 
+    'mongodb://admin:admin123@localhost:27017/eyego?authSource=admin';
+  
+  await mongoose.connect(uri, {
+    maxPoolSize: 10,
+    serverSelectionTimeoutMS: 5000,
+    socketTimeoutMS: 45000,
+  });
+  
+  console.log('Connected to MongoDB');
+}
 
-### Data Types and Constraints
-
-- **userId**: Should be a consistent identifier (UUID, email, or internal ID)
-- **activityType**: Use consistent naming convention (snake_case or camelCase)
-- **timestamp**: Always store in UTC
-- **metadata**: Keep flexible for extensibility, but consider sub-schema validation for critical fields
-
-### Performance Considerations
-
-- **Document Size**: Keep metadata reasonable (< 16MB MongoDB limit)
-- **Index Usage**: Monitor slow queries and adjust indexes as needed
-- **Sharding**: Consider sharding by `userId` for high-volume users
-- **TTL Indexes**: For log retention, consider TTL index on `timestamp` for automatic cleanup
-
-### Scalability
-
-- **Partitioning**: Shard by `userId` for even distribution
-- **Archiving**: Implement log archiving strategy for old data
-- **Read Replicas**: Use for analytics queries to offload primary
-
-## Migration Strategy
-
-### Versioning
-
-Include a `schemaVersion` field for future schema changes:
-
-```json
-{
-  "schemaVersion": 1,
-  // ... other fields
+export async function disconnectDatabase(): Promise<void> {
+  await mongoose.disconnect();
+  console.log('Disconnected from MongoDB');
 }
 ```
 
-### Backward Compatibility
+---
 
-- New optional fields should not break existing queries
-- Use migration scripts for required field additions
-- Consider view layers for API backward compatibility
+## Validation Rules
 
-## Security Considerations
+### Zod Schema (Application Layer)
 
-- **PII Data**: Avoid storing sensitive personal information in logs
-- **Access Control**: Implement proper database access controls
-- **Encryption**: Consider encrypting sensitive metadata fields
-- **Audit Trail**: Logs themselves may need auditing for compliance
+```typescript
+import { z } from 'zod';
 
-## Monitoring and Maintenance
+export const ActivityTypeEnum = z.enum([
+  'LOGIN',
+  'LOGOUT',
+  'PAGE_VIEW',
+  'BUTTON_CLICK',
+  'FORM_SUBMIT',
+  'API_CALL',
+  'ERROR'
+]);
 
-### Index Maintenance
-```javascript
-db.user_activity_logs.reIndex();
+export const UserActivityLogSchema = z.object({
+  eventId: z.string().uuid(),
+  userId: z.string().min(1),
+  activityType: ActivityTypeEnum,
+  metadata: z.record(z.any()).optional(),
+  timestamp: z.string().datetime()
+});
 ```
 
-### Statistics
-```javascript
-db.user_activity_logs.stats();
+---
+
+## Accessing the Database
+
+### MongoDB Compass (GUI)
+
+1. Download: <https://www.mongodb.com/try/download/compass>
+2. Connection string: `mongodb://admin:admin123@localhost:27017/eyego?authSource=admin`
+3. Navigate to `eyego` → `useractivitylogs`
+
+### MongoDB Shell
+
+```bash
+# Connect
+mongosh "mongodb://admin:admin123@localhost:27017/eyego?authSource=admin"
+
+# View data
+use eyego
+db.useractivitylogs.find().limit(10)
 ```
 
-### Backup Strategy
-- Regular backups of log data
-- Point-in-time recovery capability
-- Test restore procedures
+### Docker Exec
 
-This schema design provides a solid foundation for the user activity logging system, balancing flexibility, performance, and maintainability.
+```bash
+docker exec -it eyego-mongodb mongosh -u admin -p admin123 --authenticationDatabase admin
+```
+
+---
+
+## Common Queries
+
+```javascript
+// Find all logs for a user
+db.useractivitylogs.find({ userId: "user-123" })
+
+// Find LOGIN activities
+db.useractivitylogs.find({ activityType: "LOGIN" })
+
+// Find recent logs (sorted by timestamp)
+db.useractivitylogs.find().sort({ timestamp: -1 }).limit(10)
+
+// Count total logs
+db.useractivitylogs.countDocuments()
+
+// Find logs with pagination
+db.useractivitylogs.find().skip(0).limit(10)
+```
+
+---
+
+## Performance Considerations
+
+- **Index Usage**: All indexes are automatically created by Mongoose on startup
+- **Query Optimization**: Use compound indexes for multi-field queries
+- **Document Size**: Keep metadata under 16MB (MongoDB limit)
+- **Connection Pooling**: Configured with maxPoolSize: 10
+
+---
+
+## Backup Strategy
+
+```bash
+# Backup
+docker exec eyego-mongodb mongodump \
+  -u admin -p admin123 \
+  --authenticationDatabase admin \
+  --db eyego \
+  --out /backup
+
+# Restore
+docker exec eyego-mongodb mongorestore \
+  -u admin -p admin123 \
+  --authenticationDatabase admin \
+  --db eyego \
+  /backup/eyego
+```
