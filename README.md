@@ -140,7 +140,7 @@ This project implements a distributed microservices architecture for capturing, 
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/EyegoTask.git
+git clone https://github.com/MarwanabdalR/EyegoTask
 cd EyegoTask
 ```
 
