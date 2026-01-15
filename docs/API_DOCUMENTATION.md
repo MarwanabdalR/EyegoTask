@@ -1,194 +1,291 @@
-# EyegoTask API Documentation
+# API Documentation
 
-This document provides instructions on how to start the services and detailed references for the REST APIs exposed by the Producer and Consumer microservices.
-
-## 🚀 Getting Started
-
-### Prerequisites
-
-1. **Node.js**: v18+ installed.
-2. **Docker**: Ensure Docker Desktop is running (for Kafka and MongoDB).
-3. **Environment Variables**:
-    - Ensure `.env` files exist in both `producer` and `consumer` directories (or defaults will be used).
-
-### 1. Start Infrastructure
-
-Start MongoDB and Kafka using Docker Compose:
-
-```bash
-# In the root directory (where docker-compose.yml is)
-docker-compose up -d
-```
-
-### 2. Start Producer Service
-
-The Producer service creates activity logs and publishes them to Kafka.
-
-```bash
-cd producer
-npm install
-npm start
-```
-
-*Server runs on: `http://localhost:3000`*
-
-### 3. Start Consumer Service
-
-The Consumer service listens to Kafka, saves logs to MongoDB, and exposes them via an API.
-
-```bash
-cd consumer
-npm install
-npm start
-```
-
-*Server runs on: `http://localhost:3001`*
+Complete API reference for Producer and Consumer services.
 
 ---
 
-## 📡 Producer Service API
+## Getting Started
+
+### Start All Services
+
+```bash
+# Using Docker Compose (Recommended)
+docker-compose up -d
+
+# Check status
+docker-compose ps
+
+# View logs
+docker-compose logs -f producer
+docker-compose logs -f consumer
+```
+
+**Service URLs**:
+
+- Producer: <http://localhost:3000>
+- Consumer: <http://localhost:3001>
+
+---
+
+## Producer Service API
 
 **Base URL**: `http://localhost:3000`
 
-### 1. Health Check
+### Health Check
 
-Check if the service is running.
+Check if the Producer service is running.
 
-- **Endpoint**: `GET /api/health`
-- **Response**:
+**Endpoint**: `GET /api/health`
 
-  ```json
-  {
-    "status": "ok",
-    "service": "producer-service"
-  }
-  ```
+**Response** (200 OK):
 
-### 2. Publish Activity Log
+```json
+{
+  "status": "ok",
+  "service": "producer"
+}
+```
 
-Publish a new user activity log event.
+**Example**:
 
-- **Endpoint**: `POST /api/logs`
-- **Headers**: `Content-Type: application/json`
-- **Body**:
-
-  ```json
-  {
-    "userId": "user-123",
-    "activityType": "LOGIN", // Options: LOGIN, LOGOUT, VIEW_PAGE, PURCHASE
-    "timestamp": "2023-10-27T10:00:00Z", // Optional, defaults to now
-    "metadata": { // Optional
-      "device": "mobile",
-      "ip": "192.168.1.1"
-    }
-  }
-  ```
-
-- **Success Response (201 Created)**:
-
-  ```json
-  {
-    "status": "success",
-    "message": "Activity log published successfully"
-  }
-  ```
-
-- **Error Response (400 Bad Request)**:
-
-  ```json
-  {
-    "status": "error",
-    "message": "Validation Error",
-    "errors": [ ... ]
-  }
-  ```
+```bash
+curl http://localhost:3000/api/health
+```
 
 ---
 
-## 📥 Consumer Service API
+### Publish Activity Log
+
+Publish a new user activity log event to Kafka.
+
+**Endpoint**: `POST /api/logs`
+
+**Headers**:
+
+- `Content-Type: application/json`
+
+**Request Body**:
+
+```json
+{
+  "userId": "user-123",
+  "activityType": "LOGIN",
+  "metadata": {
+    "device": "mobile",
+    "ip": "192.168.1.1",
+    "location": "New York"
+  }
+}
+```
+
+**Activity Types** (Enum):
+
+- `LOGIN` - User login event
+- `LOGOUT` - User logout event
+- `PAGE_VIEW` - Page view tracking
+- `BUTTON_CLICK` - Button interaction
+- `FORM_SUBMIT` - Form submission
+- `API_CALL` - API request made
+- `ERROR` - Error event
+
+**Success Response** (201 Created):
+
+```json
+{
+  "status": "success",
+  "message": "Activity log published successfully"
+}
+```
+
+**Error Response** (400 Bad Request):
+
+```json
+{
+  "error": "Validation failed",
+  "details": [
+    {
+      "field": "userId",
+      "message": "Required"
+    }
+  ]
+}
+
+
+## Consumer Service API
 
 **Base URL**: `http://localhost:3001`
 
-### 1. Health Check
+### Health Check
 
-Check if the service is running.
+Check if the Consumer service is running.
 
-- **Endpoint**: `GET /api/health`
-- **Response**:
+**Endpoint**: `GET /api/health`
 
-  ```json
-  {
-    "status": "ok",
-    "service": "consumer-service"
-  }
-  ```
+**Response** (200 OK):
 
-### 2. Get Activity Logs
+```json
+{
+  "status": "ok",
+  "service": "consumer"
+}
+```
+
+
+
+### Get Activity Logs
 
 Retrieve a paginated list of activity logs with optional filtering.
 
-- **Endpoint**: `GET /api/logs`
-- **Query Parameters**:
-  - `page`: Page number (default: 1)
-  - `limit`: Items per page (default: 10)
-  - `userId`: Filter by User ID
-  - `activityType`: Filter by Activity Type (LOGIN, PURCHASE, etc.)
-  - `startDate`: Filter logs after this date (ISO string)
-  - `endDate`: Filter logs before this date (ISO string)
+**Endpoint**: `GET /api/logs`
 
-- **Example Request**:
-  `GET /api/logs?userId=user-123&activityType=LOGIN&page=1&limit=5`
+**Query Parameters**:
 
-- **Success Response (200 OK)**:
+| Parameter | Type | Required | Default | Description |
+|-----------|------|----------|---------|-------------|
+| `page` | number | No | 1 | Page number |
+| `limit` | number | No | 10 | Items per page (max: 100) |
+| `userId` | string | No | - | Filter by user ID |
+| `activityType` | string | No | - | Filter by activity type |
 
-  ```json
-  {
-    "status": "success",
-    "data": [
-      {
-        "eventId": "uuid-string",
-        "userId": "user-123",
-        "activityType": "LOGIN",
-        "timestamp": "2023-10-27T10:00:00.000Z",
-        "metadata": { ... }
-      },
-      ...
-    ],
-    "meta": {
-      "total": 50,
-      "page": 1,
-      "limit": 5,
-      "totalPages": 10
-    }
-  }
-  ```
 
-### 3. Get Log by ID
 
-Retrieve a single activity log by its Event ID.
+**Examples**:
 
-- **Endpoint**: `GET /api/logs/:id`
-- **Example Request**:
-  `GET /api/logs/550e8400-e29b-41d4-a716-446655440000`
+```bash
+# Get all logs (first page)
+curl http://localhost:3001/api/logs
 
-- **Success Response (200 OK)**:
+# Get logs for specific user
+curl http://localhost:3001/api/logs?userId=user-123
 
-  ```json
-  {
-    "status": "success",
-    "data": {
+# Get LOGIN activities
+curl http://localhost:3001/api/logs?activityType=LOGIN
+
+# Pagination
+curl http://localhost:3001/api/logs?page=2&limit=20
+
+# Combined filters
+curl "http://localhost:3001/api/logs?userId=user-123&activityType=LOGIN&page=1&limit=5"
+```
+
+---
+
+**Success Response** (200 OK):
+
+```json
+{
+  "status": "success",
+  "data": [
+    {
+      "_id": "507f1f77bcf86cd799439011",
       "eventId": "550e8400-e29b-41d4-a716-446655440000",
       "userId": "user-123",
-      ...
+      "activityType": "LOGIN",
+      "metadata": {
+        "device": "mobile",
+        "ip": "192.168.1.1"
+      },
+      "timestamp": "2026-01-15T03:00:00.000Z",
+      "createdAt": "2026-01-15T03:00:01.234Z",
+      "updatedAt": "2026-01-15T03:00:01.234Z"
     }
+  ],
+  "meta": {
+    "total": 42,
+    "page": 1,
+    "limit": 10,
+    "totalPages": 5
   }
-  ```
+}
+```
 
-- **Error Response (404 Not Found)**:
+### Get Log by ID
 
-  ```json
-  {
-    "status": "fail",
-    "message": "Activity log not found"
+Retrieve a single activity log by its MongoDB document ID.
+
+**Endpoint**: `GET /api/logs/:id`
+
+**Path Parameters**:
+
+- `id` - MongoDB document ID (ObjectId or eventId)
+
+**Success Response** (200 OK):
+
+```json
+{
+  "status": "success",
+  "data": {
+    "_id": "507f1f77bcf86cd799439011",
+    "eventId": "550e8400-e29b-41d4-a716-446655440000",
+    "userId": "user-123",
+    "activityType": "LOGIN",
+    "metadata": {
+      "device": "mobile"
+    },
+    "timestamp": "2026-01-15T03:00:00.000Z",
+    "createdAt": "2026-01-15T03:00:01.234Z",
+    "updatedAt": "2026-01-15T03:00:01.234Z"
   }
-  ```
+}
+```
+
+**Error Response** (404 Not Found):
+
+```json
+{
+  "status": "fail",
+  "message": "Activity log not found"
+}
+```
+
+**Example**:
+
+```bash
+curl http://localhost:3001/api/logs/507f1f77bcf86cd799439011
+```
+
+---
+
+## Error Responses
+
+All endpoints may return the following error responses:
+
+### 400 Bad Request
+
+```json
+{
+  "error": "Validation failed",
+  "details": [
+    {
+      "field": "userId",
+      "message": "Required"
+    }
+  ]
+}
+```
+
+### 404 Not Found
+
+```json
+{
+  "status": "fail",
+  "message": "Activity log not found"
+}
+```
+
+### 500 Internal Server Error
+
+```json
+{
+  "error": "Internal server error",
+  "message": "Error description"
+}
+```
+
+## Additional Resources
+
+- **README**: Complete project documentation
+- **Database Schema**: MongoDB schema reference
+- **Kafka Topics**: Kafka configuration details
+- **Docker Setup**: Docker deployment guide
+- **Kubernetes Setup**: K8s deployment guide
